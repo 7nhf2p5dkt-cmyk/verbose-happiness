@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💣 МайнСвипер</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--gold:#F5C842;--gem:#00d4ff;--dark:#0a0a0f;--card:#12121a;--card2:#1a1a26;--border:#2a2a3a;--text:#e0e0f0;--green:#3DDC84;--red:#ff4757;}
+body{background:var(--dark);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* NAV */
+nav{background:#0d0d18;border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;color:var(--gold);letter-spacing:.1em;}
+.nav-currencies{display:flex;gap:10px;margin-left:auto;align-items:center;}
+.curr{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;}
+.curr.gold{color:var(--gold);border-color:rgba(245,200,66,.3);}
+.curr.gem{color:var(--gem);border-color:rgba(0,212,255,.3);}
+.nav-btns{display:flex;gap:6px;}
+.nbtn{padding:6px 14px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+.nbtn.outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.nbtn.primary{background:var(--gold);color:#000;}
+.nbtn.admin{background:#2d1a4a;color:#c084fc;border:1px solid #7c3aed;}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto;padding:16px;}
+
+/* GAME AREA */
+.game-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px;}
+.game-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.game-title{font-family:'Orbitron',monospace;font-size:.9rem;color:var(--gold);}
+.size-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.sbtn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:11px;cursor:pointer;transition:all .15s;}
+.sbtn.active,.sbtn:hover{background:var(--gold);color:#000;border-color:var(--gold);}
+.game-info{display:flex;gap:14px;margin-left:auto;align-items:center;}
+.gi{font-size:12px;color:#888;}
+.gi b{color:var(--text);}
+
+/* BOARD */
+#boardWrap{display:flex;justify-content:center;overflow:auto;padding:8px 0;}
+#board{display:inline-grid;gap:2px;padding:8px;background:#0d0d18;border-radius:10px;border:1px solid var(--border);}
+.cell{width:36px;height:36px;border-radius:5px;border:none;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .1s,transform .08s;position:relative;overflow:hidden;font-family:'Inter',sans-serif;}
+.cell:active{transform:scale(.92);}
+.cell.hidden{background:#1e1e2e;border:1px solid #2a2a3a;color:transparent;}
+.cell.hidden:hover{background:#252535;}
+.cell.flagged{background:#1e1e2e;border:1px solid rgba(245,200,66,.4);}
+.cell.revealed{background:#0d0d18;border:1px solid #1a1a28;cursor:default;}
+.cell.mine{background:#3a0a0a;border:1px solid var(--red);}
+.cell.safe-reveal{animation:safeFlash .3s ease;}
+@keyframes safeFlash{0%{background:#0d3020;}100%{background:#0d0d18;}}
+.n1{color:#3DDC84;} .n2{color:#00d4ff;} .n3{color:#ff6b81;} .n4{color:#a29bfe;}
+.n5{color:#fd9644;} .n6{color:#00cec9;} .n7{color:#fd79a8;} .n8{color:#dfe6e9;}
+
+/* RESULT */
+#resultBanner{display:none;text-align:center;padding:16px;border-radius:12px;margin-bottom:14px;}
+#resultBanner.win{background:rgba(61,220,132,.1);border:1px solid rgba(61,220,132,.3);}
+#resultBanner.lose{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);}
+#resultBanner h2{font-family:'Orbitron',monospace;font-size:1.2rem;margin-bottom:6px;}
+#resultBanner p{font-size:13px;color:#aaa;margin-bottom:10px;}
+
+/* SHOP / NFT */
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);}
+.tab{padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;color:#666;border-bottom:2px solid transparent;transition:.2s;}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.panel{display:none;} .panel.active{display:block;}
+
+/* SHOP ITEMS */
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.shop-item{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s;}
+.shop-item:hover{border-color:#3a3a5a;}
+.shop-item.gem-item{border-color:rgba(0,212,255,.2);}
+.si-icon{font-size:28px;text-align:center;}
+.si-name{font-size:13px;font-weight:600;}
+.si-desc{font-size:11px;color:#666;line-height:1.4;}
+.si-price{font-size:12px;font-weight:700;}
+.si-price.gold{color:var(--gold);}
+.si-price.gem{color:var(--gem);}
+.buy-btn{padding:7px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;width:100%;transition:.15s;font-family:'Inter',sans-serif;}
+.buy-btn.gold-btn{background:var(--gold);color:#000;}
+.buy-btn.gem-btn{background:var(--gem);color:#000;}
+.buy-btn:hover{opacity:.85;}
+.buy-btn:disabled{background:#2a2a3a;color:#555;cursor:not-allowed;}
+
+/* NFT GRID */
+.nft-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+.nft-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .15s;}
+.nft-card:hover{border-color:rgba(0,212,255,.4);transform:translateY(-2px);}
+.nft-canvas{display:block;width:100%;aspect-ratio:1;image-rendering:pixelated;}
+.nft-info{padding:10px;}
+.nft-id{font-size:10px;color:#555;font-family:monospace;}
+.nft-name{font-size:12px;font-weight:600;margin:2px 0;}
+.nft-rarity{font-size:10px;font-weight:700;}
+.rarity-common{color:#95a5a6;} .rarity-rare{color:#3498db;} .rarity-epic{color:#9b59b6;} .rarity-legendary{color:#f39c12;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;}
+.overlay.show{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:min(420px,94vw);max-height:88vh;overflow-y:auto;}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.modal-head h3{font-family:'Orbitron',monospace;font-size:.95rem;color:var(--gold);}
+.modal-close{background:none;border:none;color:#666;font-size:20px;cursor:pointer;}
+.modal-body{padding:16px 20px;}
+
+/* PROMO INPUT */
+.promo-wrap{display:flex;gap:8px;margin-bottom:12px;}
+.promo-input{flex:1;padding:10px 14px;background:#0d0d18;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none;}
+.promo-input:focus{border-color:var(--gold);}
+.promo-btn{padding:10px 18px;background:var(--gold);border:none;border-radius:8px;color:#000;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+
+/* ADMIN */
+.admin-section{background:#0d0818;border:1px solid #3d1a6e;border-radius:12px;padding:16px;margin-bottom:12px;}
+.admin-title{color:#c084fc;font-family:'Orbitron',monospace;font-size:.8rem;margin-bottom:12px;}
+.admin-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.admin-input{flex:1;min-width:120px;padding:8px 12px;background:#150d22;border:1px solid #3d1a6e;border-radius:7px;color:#e0e0f0;font-size:12px;outline:none;font-family:'Inter',sans-serif;}
+.admin-btn{padding:8px 16px;background:#7c3aed;border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+.admin-btn:hover{background:#6d28d9;}
+.admin-log{background:#0a0512;border:1px solid #2d1050;border-radius:8px;padding:10px;font-size:11px;color:#a78bfa;font-family:monospace;min-height:60px;max-height:120px;overflow-y:auto;}
+.promo-list{font-size:11px;font-family:monospace;color:#a78bfa;line-height:1.8;}
+
+
+.term-btn{padding:10px 8px;border-radius:8px;border:1px solid var(--border);background:#0d0d18;color:var(--text);font-size:12px;cursor:pointer;transition:.15s;font-family:'Inter',sans-serif;line-height:1.4;}
+.term-btn.active,.term-btn:hover{border-color:var(--gold);background:rgba(245,200,66,.08);color:var(--gold);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--gold);color:var(--text);padding:11px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s;white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* FLAG TOGGLE */
+.flag-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:#888;}
+.flag-toggle input{width:16px;height:16px;cursor:pointer;accent-color:var(--gold);}
+
+/* Boost badge */
+.boost-badge{background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.3);border-radius:6px;padding:3px 10px;font-size:11px;color:var(--gold);font-weight:600;}
+
+@media(max-width:500px){
+  .cell{width:30px;height:30px;font-size:12px;}
+  .shop-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">💣 MINESWAP</div>
+  <div class="nav-currencies">
+    <div class="curr gold" title="Монеты" onclick="showToast('Монеты зарабатываются в игре')">🪙 <span id="navGold">0</span></div>
+    <div class="curr gem" title="Кристаллы (донат)">💎 <span id="navGem">0</span></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nbtn outline" onclick="openPromo()">🎁 Промокод</button>
+    <button class="nbtn admin" onclick="openAdmin()">⚙️ Админ</button>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- GAME -->
+  <div class="game-section">
+    <div class="game-header">
+      <span class="game-title">💣 САПЁР</span>
+      <div class="size-btns">
+        <button class="sbtn active" onclick="setSize(9,9,10,'easy')">9×9 Легко</button>
+        <button class="sbtn" onclick="setSize(12,12,20,'medium')">12×12 Средне</button>
+        <button class="sbtn" onclick="setSize(16,16,40,'hard')">16×16 Сложно</button>
+        <button class="sbtn" onclick="setSize(20,20,70,'expert')">20×20 Эксперт</button>
+      </div>
+      <div class="game-info">
+        <div class="gi">💣 <b id="mineCount">10</b></div>
+        <div class="gi">⏱ <b id="timer">0</b>с</div>
+        <div id="boostBadge" class="boost-badge" style="display:none">⚡ ×<span id="boostVal">1</span></div>
+      </div>
+    </div>
+
+    <div class="flag-toggle">
+      <input type="checkbox" id="flagMode"> <label for="flagMode">🚩 Режим флага (ПКМ / долгое нажатие)</label>
+    </div>
+
+    <div id="resultBanner">
+      <h2 id="resultTitle"></h2>
+      <p id="resultDesc"></p>
+      <button class="buy-btn gold-btn" style="width:auto;padding:8px 24px" onclick="newGame()">🔄 Новая игра</button>
+    </div>
+
+    <div id="boardWrap"><div id="board"></div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="game-section" style="padding-bottom:20px">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('shop')">🏪 Магазин</div>
+      <div class="tab" onclick="switchTab('nft')">🎨 NFT Коллекция</div>
+      <div class="tab" onclick="switchTab('my-nft')">👝 Мои NFT</div>
+      <div class="tab" onclick="switchTab('exchange')">💱 Обмен</div>
+      <div class="tab" onclick="switchTab('bank')">🏦 Банк</div>
+    </div>
+
+
+    <!-- BANK -->
+    <div id="tab-bank" class="panel">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
+        <!-- Deposit form -->
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:18px;">
+          <h3 style="font-family:'Orbitron',monospace;font-size:.8rem;color:var(--gold);margin-bottom:14px">📥 Открыть вклад</h3>
+          <div style="margin-bottom:10px">
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:5px">Сумма вклада 🪙</label>
+            <input id="bankAmount" type="number" min="100" step="100" placeholder="Минимум 100 монет"
+              style="width:100%;padding:10px;background:#0d0d18;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none">
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:8px">Срок вклада</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="termBtns">
+              <button class="term-btn active" data-days="1" data-rate="2" onclick="selectTerm(this)">1 день<br><small style="color:var(--green)">+2%</small></button>
+              <button class="term-btn" data-days="3" data-rate="7" onclick="selectTerm(this)">3 дня<br><small style="color:var(--green)">+7%</small></button>
+              <button class="term-btn" data-days="7" data-rate="18" onclick="selectTerm(this)">7 дней<br><small style="color:var(--green)">+18%</small></button>
+              <button class="term-btn" data-days="30" data-rate="80" onclick="selectTerm(this)">30 дней<br><small style="color:var(--gold)">+80%</small></button>
+            </div>
+          </div>
+          <div id="bankPreview" style="background:#0d0d18;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#888">
+            Выбери срок и сумму
+          </div>
+          <button class="buy-btn gold-btn" onclick="openDeposit()">📥 Открыть вклад</button>
+        </div>
+        <!-- Active deposits -->
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:18px;">
+          <h3 style="font-family:'Orbitron',monospace;font-size:.8rem;color:var(--gold);margin-bottom:14px">📊 Активные вклады</h3>
+          <div id="activeDeposits"><p style="color:#555;font-size:12px">Вкладов нет</p></div>
+        </div>
+      </div>
+      <!-- History -->
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:14px">
+        <h3 style="font-family:'Orbitron',monospace;font-size:.8rem;color:var(--gold);margin-bottom:12px">📜 История вкладов</h3>
+        <div id="depositHistory"><p style="color:#555;font-size:12px">История пуста</p></div>
+      </div>
+    </div>
+
+    <!-- SHOP -->
+    <div id="tab-shop" class="panel active">
+      <div class="shop-grid" id="shopGrid"></div>
+    </div>
+
+    <!-- NFT MARKET -->
+    <div id="tab-nft" class="panel">
+      <p style="color:#666;font-size:12px;margin-bottom:14px">Каждый NFT — уникальный пиксель-арт с неповторимым ID. Стоимость: 200 💎</p>
+      <div class="nft-grid" id="nftMarket"></div>
+    </div>
+
+    <!-- MY NFTs -->
+    <div id="tab-my-nft" class="panel">
+      <div id="myNftGrid" class="nft-grid"></div>
+      <p id="emptyNft" style="color:#555;font-size:13px;text-align:center;padding:30px">У тебя пока нет NFT. Купи в коллекции за 200 💎</p>
+    </div>
+
+    <!-- EXCHANGE -->
+    <div id="tab-exchange" class="panel">
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:340px;margin:0 auto">
+        <h3 style="font-family:'Orbitron',monospace;font-size:.85rem;color:var(--gold);margin-bottom:16px">💱 Обмен валюты</h3>
+        <div style="font-size:13px;color:#888;margin-bottom:14px">Курс: <b style="color:var(--text)">4,000 🪙 = 1 💎</b></div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:12px;color:#888;display:block;margin-bottom:5px">Потратить монет 🪙</label>
+          <input id="exchAmount" type="number" min="4000" step="4000" value="4000" style="width:100%;padding:10px;background:#0d0d18;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+        </div>
+        <div style="font-size:12px;color:#666;margin-bottom:14px">Получишь 💎: <b id="exchResult" style="color:var(--gem)">1</b></div>
+        <button class="buy-btn gem-btn" onclick="doExchange()">Обменять</button>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="font-size:12px;color:#888;margin-bottom:8px">Или введи нужное количество 💎:</div>
+          <input id="exchGem" type="number" min="1" value="1" style="width:100%;padding:10px;background:#0d0d18;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;margin-bottom:8px">
+          <div style="font-size:12px;color:#666;margin-bottom:10px">Стоит монет: <b id="exchCoinCost" style="color:var(--gold)">4,000</b></div>
+          <button class="buy-btn gold-btn" onclick="doExchangeGem()">Купить кристаллы</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROMO MODAL -->
+<div class="overlay" id="promoOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🎁 Промокод</h3>
+      <button class="modal-close" onclick="closeOverlay('promoOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:#888;margin-bottom:14px">Введи промокод чтобы получить бонус</p>
+      <div class="promo-wrap">
+        <input class="promo-input" id="promoInput" placeholder="ВВЕДИ ПРОМОКОД" style="text-transform:uppercase">
+        <button class="promo-btn" onclick="usePromo()">✅ Применить</button>
+      </div>
+      <div id="promoMsg" style="font-size:12px;color:#888"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="overlay" id="adminOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⚙️ АДМИН ПАНЕЛЬ</h3>
+      <button class="modal-close" onclick="closeOverlay('adminOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="adminAuth" style="display:block">
+        <p style="font-size:13px;color:#888;margin-bottom:12px">Введи пароль администратора</p>
+        <div style="display:flex;gap:8px">
+          <input class="admin-input" id="adminPassInput" type="password" placeholder="Пароль...">
+          <button class="admin-btn" onclick="checkAdminPass()">Войти</button>
+        </div>
+        <p style="font-size:11px;color:#555;margin-top:8px">Только администратор имеет доступ</p>
+      </div>
+      <div id="adminPanel" style="display:none">
+
+        <div class="admin-section">
+          <div class="admin-title">🎁 Создать промокод</div>
+          <div class="admin-row">
+            <input class="admin-input" id="newPromoCode" placeholder="КОД (латиница)">
+            <input class="admin-input" id="newPromoGold" type="number" placeholder="Монет 🪙" min="0">
+            <input class="admin-input" id="newPromoGem" type="number" placeholder="Кристаллов 💎" min="0">
+          </div>
+          <div class="admin-row">
+            <input class="admin-input" id="newPromoMult" type="number" placeholder="Множитель (1=нет)" min="1" step="0.1">
+            <input class="admin-input" id="newPromoMultDur" type="number" placeholder="Длительность (мин)" min="1">
+            <input class="admin-input" id="newPromoUses" type="number" placeholder="Макс использований" min="1">
+          </div>
+          <button class="admin-btn" onclick="createPromo()">➕ Создать промокод</button>
+        </div>
+
+        <div class="admin-section">
+          <div class="admin-title">📋 Активные промокоды</div>
+          <div class="promo-list" id="promoList">Промокодов нет</div>
+        </div>
+
+        <div class="admin-section">
+          <div class="admin-title">💰 Выдать валюту игроку (себе)</div>
+          <div class="admin-row">
+            <input class="admin-input" id="giveGold" type="number" placeholder="Монет 🪙">
+            <input class="admin-input" id="giveGem" type="number" placeholder="Кристаллов 💎">
+            <button class="admin-btn" onclick="adminGive()">Выдать</button>
+          </div>
+        </div>
+
+        <div class="admin-section">
+          <div class="admin-title">⚡ Установить глобальный множитель</div>
+          <div class="admin-row">
+            <input class="admin-input" id="globalMult" type="number" placeholder="Множитель" min="1" step="0.5" value="1">
+            <input class="admin-input" id="globalMultDur" type="number" placeholder="Минут" min="1">
+            <button class="admin-btn" onclick="setGlobalMult()">Применить</button>
+          </div>
+        </div>
+
+        <div class="admin-section">
+          <div class="admin-title">📊 Лог действий</div>
+          <div class="admin-log" id="adminLog">Лог пуст</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+const ADMIN_PASSWORD = 'admin2025'; // Смени на свой!
+
+const S = {
+  gold: 0,
+  gems: 0,
+  mult: 1,
+  multEnd: 0,
+  ownedNfts: [],
+  usedPromos: {},
+  promoCodes: {
+    // Default promo codes
+    'START': {gold:1000, gem:0, mult:1, uses:999, used:0, desc:'+1000 монет'},
+    'GEMS10': {gold:0, gem:10, mult:1, uses:999, used:0, desc:'+10 кристаллов'},
+    'BOOST2': {gold:0, gem:0, mult:2, multMin:10, uses:50, used:0, desc:'×2 на 10 минут'},
+  },
+  adminLog: [],
+};
+function save(){try{localStorage.setItem('mineswap_v2',JSON.stringify(S));}catch(e){}}
+function load(){
+  try{
+    const d=localStorage.getItem('mineswap_v2');
+    if(d){const p=JSON.parse(d);Object.assign(S,p);}
+    else{
+      // Migrate from old save
+      const old=localStorage.getItem('mineswap');
+      if(old){const p=JSON.parse(old);Object.assign(S,p);}
+    }
+  }catch(e){}
+  if(!S.deposits)S.deposits=[];
+}
+load();
+
+// ===== GAME =====
+let G = {
+  rows:9, cols:9, mines:10, diff:'easy',
+  board:[], revealed:[], flagged:[],
+  started:false, over:false, won:false,
+  timer:0, timerInterval:null,
+  firstClick:true,
+};
+
+function setSize(r,c,m,diff){
+  G.rows=r;G.cols=c;G.mines=m;G.diff=diff;
+  document.querySelectorAll('.sbtn').forEach((b,i)=>{
+    b.classList.toggle('active',['easy','medium','hard','expert'][i]===diff);
+  });
+  newGame();
+}
+
+function newGame(){
+  clearInterval(G.timerInterval);
+  G.board=[];G.revealed=[];G.flagged=[];
+  G.started=false;G.over=false;G.won=false;
+  G.firstClick=true;G.timer=0;
+  document.getElementById('timer').textContent='0';
+  document.getElementById('mineCount').textContent=G.mines;
+  document.getElementById('resultBanner').style.display='none';
+  for(let i=0;i<G.rows*G.cols;i++){G.board.push(0);G.revealed.push(false);G.flagged.push(false);}
+  renderBoard();
+}
+
+function placeMines(safeIdx){
+  let placed=0;
+  while(placed<G.mines){
+    const i=Math.floor(Math.random()*G.rows*G.cols);
+    if(i!==safeIdx&&G.board[i]!==9){G.board[i]=9;placed++;}
+  }
+  for(let r=0;r<G.rows;r++) for(let c=0;c<G.cols;c++){
+    if(G.board[r*G.cols+c]===9)continue;
+    let cnt=0;
+    for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+      const nr=r+dr,nc=c+dc;
+      if(nr>=0&&nr<G.rows&&nc>=0&&nc<G.cols&&G.board[nr*G.cols+nc]===9)cnt++;
+    }
+    G.board[r*G.cols+c]=cnt;
+  }
+}
+
+function renderBoard(){
+  const board=document.getElementById('board');
+  board.style.gridTemplateColumns=`repeat(${G.cols},auto)`;
+  board.innerHTML='';
+  for(let i=0;i<G.rows*G.cols;i++){
+    const cell=document.createElement('button');
+    cell.className='cell';
+    const rev=G.revealed[i],flag=G.flagged[i];
+    if(rev){
+      cell.classList.add('revealed');
+      if(G.board[i]===9){cell.classList.add('mine');cell.textContent='💣';}
+      else if(G.board[i]>0){cell.textContent=G.board[i];cell.classList.add('n'+G.board[i]);}
+    } else if(flag){
+      cell.classList.add('flagged');cell.textContent='🚩';
+    } else {
+      cell.classList.add('hidden');
+    }
+    cell.dataset.i=i;
+    cell.addEventListener('click',onCellClick);
+    cell.addEventListener('contextmenu',onCellRightClick);
+    // Long press for mobile flag
+    let pressTimer;
+    cell.addEventListener('touchstart',()=>{pressTimer=setTimeout(()=>{onFlag(i);},500);},{passive:true});
+    cell.addEventListener('touchend',()=>clearTimeout(pressTimer));
+    board.appendChild(cell);
+  }
+}
+
+function onCellClick(e){
+  const i=+e.currentTarget.dataset.i;
+  if(G.over||G.revealed[i])return;
+  if(document.getElementById('flagMode').checked){onFlag(i);return;}
+  if(G.flagged[i])return;
+  if(G.firstClick){G.firstClick=false;placeMines(i);startTimer();}
+  reveal(i);
+}
+function onCellRightClick(e){e.preventDefault();const i=+e.currentTarget.dataset.i;onFlag(i);}
+function onFlag(i){
+  if(G.over||G.revealed[i])return;
+  G.flagged[i]=!G.flagged[i];
+  const flaggedCount=G.flagged.filter(Boolean).length;
+  document.getElementById('mineCount').textContent=G.mines-flaggedCount;
+  renderBoard();
+}
+
+function reveal(i){
+  if(G.revealed[i]||G.flagged[i]||G.over)return;
+  G.revealed[i]=true;
+  if(G.board[i]===9){
+    // BOOM
+    G.over=true;G.won=false;
+    clearInterval(G.timerInterval);
+    // Reveal all mines
+    G.board.forEach((v,j)=>{if(v===9)G.revealed[j]=true;});
+    renderBoard();
+    showResult(false);return;
+  }
+  if(G.board[i]===0){
+    const r=Math.floor(i/G.cols),c=i%G.cols;
+    for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+      const nr=r+dr,nc=c+dc;
+      if(nr>=0&&nr<G.rows&&nc>=0&&nc<G.cols)reveal(nr*G.cols+nc);
+    }
+  }
+  renderBoard();
+  checkWin();
+}
+
+function checkWin(){
+  const safe=G.rows*G.cols-G.mines;
+  const revSafe=G.revealed.filter((r,i)=>r&&G.board[i]!==9).length;
+  if(revSafe===safe){
+    G.over=true;G.won=true;clearInterval(G.timerInterval);
+    showResult(true);
+  }
+}
+
+function showResult(won){
+  const banner=document.getElementById('resultBanner');
+  banner.className='';banner.classList.add(won?'win':'lose');
+  banner.style.display='block';
+  if(won){
+    const mult=getCurrentMult();
+    const rewards={easy:50,medium:150,hard:400,expert:900};
+    const base=rewards[G.diff]||50;
+    const earned=Math.floor(base*mult);
+    S.gold+=earned;updateUI();save();
+    document.getElementById('resultTitle').textContent='🎉 ПОБЕДА!';
+    document.getElementById('resultDesc').textContent=`+${earned.toLocaleString()} 🪙 монет${mult>1?' (×'+mult+' буст!)':''}`;
+    adminLog(`WIN: +${earned} монет (сложность: ${G.diff}, ×${mult})`);
+  } else {
+    document.getElementById('resultTitle').textContent='💥 ПОДРЫВ!';
+    document.getElementById('resultDesc').textContent='Ты наступил на мину! Попробуй снова.';
+  }
+}
+
+function startTimer(){
+  G.timerInterval=setInterval(()=>{
+    G.timer++;document.getElementById('timer').textContent=G.timer;
+  },1000);
+}
+
+function getCurrentMult(){
+  const now=Date.now();
+  if(S.multEnd>now)return S.mult;
+  S.mult=1;S.multEnd=0;
+  updateBoostBadge();return 1;
+}
+
+function updateBoostBadge(){
+  const now=Date.now();
+  const badge=document.getElementById('boostBadge');
+  if(S.multEnd>now&&S.mult>1){
+    badge.style.display='block';
+    document.getElementById('boostVal').textContent=S.mult;
+  } else badge.style.display='none';
+}
+
+// ===== UI =====
+function updateUI(){
+  document.getElementById('navGold').textContent=S.gold.toLocaleString();
+  document.getElementById('navGem').textContent=S.gems.toLocaleString();
+  updateBoostBadge();
+}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',['shop','nft','my-nft','exchange'][i]===t);
+  });
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='nft')renderNftMarket();
+  if(t==='my-nft')renderMyNfts();
+}
+
+// ===== SHOP =====
+const SHOP_ITEMS=[
+  {id:'mult2',icon:'⚡',name:'Буст ×2',desc:'Двойные монеты на 5 минут',price:500,currency:'gold',action:()=>applyBoost(2,5)},
+  {id:'mult3',icon:'🚀',name:'Буст ×3',desc:'Тройные монеты на 5 минут',price:2000,currency:'gold',action:()=>applyBoost(3,5)},
+  {id:'reveal',icon:'👁️',name:'Подсказка',desc:'Открыть одну безопасную клетку',price:300,currency:'gold',action:()=>revealHint()},
+  {id:'flag5',icon:'🚩',name:'Авто-флаги ×5',desc:'Пометить 5 случайных мин',price:800,currency:'gold',action:()=>autoFlag(5)},
+  {id:'gem5',icon:'💎',name:'5 кристаллов',desc:'Конвертировать монеты в кристаллы',price:20000,currency:'gold',action:()=>{S.gems+=5;save();showToast('💎 +5 кристаллов!');}},
+  {id:'boost_gem',icon:'✨',name:'Буст ×5 (1ч)',desc:'Пятикратные монеты на час',price:50,currency:'gem',action:()=>applyBoost(5,60)},
+  {id:'boost_gem2',icon:'🌟',name:'Буст ×10 (1ч)',desc:'Десятикратные монеты на час',price:120,currency:'gem',action:()=>applyBoost(10,60)},
+];
+
+function renderShop(){
+  const grid=document.getElementById('shopGrid');
+  grid.innerHTML='';
+  SHOP_ITEMS.forEach(item=>{
+    const div=document.createElement('div');
+    div.className=`shop-item ${item.currency==='gem'?'gem-item':''}`;
+    const isGem=item.currency==='gem';
+    div.innerHTML=`
+      <div class="si-icon">${item.icon}</div>
+      <div class="si-name">${item.name}</div>
+      <div class="si-desc">${item.desc}</div>
+      <div class="si-price ${isGem?'gem':'gold'}">${item.price.toLocaleString()} ${isGem?'💎':'🪙'}</div>
+      <button class="buy-btn ${isGem?'gem-btn':'gold-btn'}" onclick="buyShopItem('${item.id}')">Купить</button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function buyShopItem(id){
+  const item=SHOP_ITEMS.find(i=>i.id===id);if(!item)return;
+  if(item.currency==='gold'){
+    if(S.gold<item.price){showToast('❌ Мало монет!');return;}
+    S.gold-=item.price;
+  } else {
+    if(S.gems<item.price){showToast('❌ Мало кристаллов!');return;}
+    S.gems-=item.price;
+  }
+  item.action();updateUI();save();
+}
+
+function applyBoost(mult,minutes){
+  S.mult=mult;S.multEnd=Date.now()+minutes*60000;
+  updateUI();save();
+  showToast(`⚡ Буст ×${mult} на ${minutes} мин!`);
+}
+
+function revealHint(){
+  if(G.over||G.firstClick){showToast('Начни игру сначала');return;}
+  const safe=[];
+  G.board.forEach((v,i)=>{if(v!==9&&!G.revealed[i]&&!G.flagged[i])safe.push(i);});
+  if(!safe.length){showToast('Нечего открывать!');return;}
+  reveal(safe[Math.floor(Math.random()*safe.length)]);
+  showToast('👁️ Подсказка использована!');
+}
+
+function autoFlag(count){
+  if(G.firstClick){showToast('Начни игру сначала');return;}
+  const mines=[];
+  G.board.forEach((v,i)=>{if(v===9&&!G.flagged[i]&&!G.revealed[i])mines.push(i);});
+  const toFlag=mines.slice(0,count);
+  toFlag.forEach(i=>G.flagged[i]=true);
+  renderBoard();
+  showToast(`🚩 Помечено ${toFlag.length} мин!`);
+}
+
+// ===== NFT =====
+const NFT_RARITIES=['common','rare','epic','legendary'];
+const NFT_RARITY_NAMES={common:'Обычный',rare:'Редкий',epic:'Эпический',legendary:'Легендарный'};
+const NFT_RARITY_WEIGHTS=[60,25,12,3];
+
+function generateNftArt(seed, rarity){
+  const canvas=document.createElement('canvas');
+  canvas.width=16;canvas.height=16;
+  const c=canvas.getContext('2d');
+  // Deterministic random
+  let s=seed*9301+49297;
+  function rng(){s=(s*9301+49297)%233280;return s/233280;}
+
+  const palettes={
+    common:['#555','#888','#aaa','#ccc','#eee'],
+    rare:['#1a5276','#2471a3','#3498db','#5dade2','#aed6f1'],
+    epic:['#6c3483','#8e44ad','#a569bd','#d2b4de','#e8daef','#f39c12'],
+    legendary:['#7b241c','#c0392b','#e74c3c','#f9ca24','#fff','#f0e6ff','#00d4ff'],
+  };
+  const pal=palettes[rarity];
+
+  // Background
+  c.fillStyle=pal[0];c.fillRect(0,0,16,16);
+
+  // Generate symmetric pixel art (left half mirrored)
+  for(let y=0;y<16;y++){
+    for(let x=0;x<8;x++){
+      if(rng()>0.45){
+        c.fillStyle=pal[Math.floor(rng()*pal.length)];
+        c.fillRect(x,y,1,1);
+        c.fillRect(15-x,y,1,1);// mirror
+      }
+    }
+  }
+
+  // Add special details based on rarity
+  if(rarity==='legendary'||rarity==='epic'){
+    // Crown/halo
+    c.fillStyle=pal[pal.length-1];
+    for(let x=5;x<=10;x++) if(rng()>.3) c.fillRect(x,0,1,2);
+  }
+  if(rarity==='legendary'){
+    // Glow outline
+    c.strokeStyle='rgba(255,215,0,0.8)';c.lineWidth=0.5;
+    c.strokeRect(0.5,0.5,15,15);
+  }
+
+  return canvas;
+}
+
+function pickRarity(){
+  const r=Math.random()*100;
+  let acc=0;
+  for(let i=0;i<NFT_RARITIES.length;i++){
+    acc+=NFT_RARITY_WEIGHTS[i];
+    if(r<acc)return NFT_RARITIES[i];
+  }
+  return 'common';
+}
+
+const NFT_ADJECTIVES=['Древний','Призрачный','Горящий','Ледяной','Золотой','Тёмный','Светлый','Туманный','Бурный','Звёздный'];
+const NFT_NOUNS=['Воин','Дракон','Сапёр','Феникс','Дух','Демон','Ангел','Рыцарь','Охотник','Призрак'];
+
+function generateNftId(){return 'NFT-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).substr(2,5).toUpperCase();}
+
+function createNftData(id){
+  const seed=parseInt(id.replace(/[^0-9A-Z]/g,'').substr(0,8),36)||Math.random()*99999|0;
+  const rarity=pickRarity();
+  const adj=NFT_ADJECTIVES[seed%NFT_ADJECTIVES.length];
+  const noun=NFT_NOUNS[(seed*7)%NFT_NOUNS.length];
+  return {id,seed,rarity,name:`${adj} ${noun}`,ts:Date.now()};
+}
+
+const NFT_MARKET_POOL=[];
+for(let i=0;i<12;i++) NFT_MARKET_POOL.push(createNftData(generateNftId()));
+
+function renderNftCard(nft,container,buyable){
+  const card=document.createElement('div');card.className='nft-card';
+  const artCanvas=generateNftArt(nft.seed,nft.rarity);
+  artCanvas.className='nft-canvas';artCanvas.style.width='100%';artCanvas.style.aspectRatio='1';
+  artCanvas.style.imageRendering='pixelated';
+  card.appendChild(artCanvas);
+  const info=document.createElement('div');info.className='nft-info';
+  info.innerHTML=`
+    <div class="nft-id">${nft.id}</div>
+    <div class="nft-name">${nft.name}</div>
+    <div class="nft-rarity rarity-${nft.rarity}">${NFT_RARITY_NAMES[nft.rarity]}</div>
+    ${buyable?`<button class="buy-btn gem-btn" style="margin-top:8px" onclick="buyNft('${nft.id}')">200 💎 Купить</button>`:''}
+  `;
+  card.appendChild(info);
+  container.appendChild(card);
+}
+
+function renderNftMarket(){
+  const grid=document.getElementById('nftMarket');grid.innerHTML='';
+  NFT_MARKET_POOL.forEach(nft=>{
+    const owned=S.ownedNfts.find(n=>n.id===nft.id);
+    if(!owned)renderNftCard(nft,grid,true);
+  });
+  if(!grid.children.length)grid.innerHTML='<p style="color:#555;font-size:13px;text-align:center;padding:30px">Все NFT куплены! Новые появятся скоро.</p>';
+}
+
+function renderMyNfts(){
+  const grid=document.getElementById('myNftGrid');grid.innerHTML='';
+  const empty=document.getElementById('emptyNft');
+  if(!S.ownedNfts.length){empty.style.display='block';return;}
+  empty.style.display='none';
+  S.ownedNfts.forEach(nft=>renderNftCard(nft,grid,false));
+}
+
+function buyNft(id){
+  if(S.gems<200){showToast('❌ Нужно 200 💎!');return;}
+  const nft=NFT_MARKET_POOL.find(n=>n.id===id);if(!nft)return;
+  S.gems-=200;
+  S.ownedNfts.push(nft);
+  // Remove from market and add new
+  const idx=NFT_MARKET_POOL.indexOf(nft);
+  NFT_MARKET_POOL.splice(idx,1);
+  NFT_MARKET_POOL.push(createNftData(generateNftId()));
+  save();updateUI();
+  showToast(`🎨 NFT "${nft.name}" (${NFT_RARITY_NAMES[nft.rarity]}) куплен!`);
+  renderNftMarket();adminLog(`NFT куплен: ${nft.id} — ${nft.name}`);
+}
+
+// ===== EXCHANGE =====
+document.getElementById('exchAmount').addEventListener('input',()=>{
+  const a=+document.getElementById('exchAmount').value||0;
+  document.getElementById('exchResult').textContent=Math.floor(a/4000);
+});
+document.getElementById('exchGem').addEventListener('input',()=>{
+  const g=+document.getElementById('exchGem').value||0;
+  document.getElementById('exchCoinCost').textContent=(g*4000).toLocaleString();
+});
+function doExchange(){
+  const a=+document.getElementById('exchAmount').value||0;
+  const gems=Math.floor(a/4000);
+  if(gems<1){showToast('Минимум 4000 монет');return;}
+  if(S.gold<a){showToast('❌ Недостаточно монет');return;}
+  S.gold-=a;S.gems+=gems;save();updateUI();
+  showToast(`💱 +${gems} 💎 кристаллов!`);
+}
+function doExchangeGem(){
+  const g=+document.getElementById('exchGem').value||0;
+  const cost=g*4000;
+  if(S.gold<cost){showToast(`❌ Нужно ${cost.toLocaleString()} 🪙`);return;}
+  S.gold-=cost;S.gems+=g;save();updateUI();
+  showToast(`💎 +${g} кристаллов!`);
+}
+
+// ===== PROMO =====
+function openPromo(){document.getElementById('promoOverlay').classList.add('show');}
+function usePromo(){
+  const code=document.getElementById('promoInput').value.trim().toUpperCase();
+  const msg=document.getElementById('promoMsg');
+  if(!code){msg.textContent='Введи промокод';msg.style.color='#e74c3c';return;}
+  if(S.usedPromos[code]){msg.textContent='❌ Промокод уже использован';msg.style.color='#e74c3c';return;}
+  const pr=S.promoCodes[code];
+  if(!pr){msg.textContent='❌ Неверный промокод';msg.style.color='#e74c3c';return;}
+  if(pr.uses&&pr.used>=pr.uses){msg.textContent='❌ Промокод исчерпан';msg.style.color='#e74c3c';return;}
+  // Apply
+  if(pr.gold)S.gold+=pr.gold;
+  if(pr.gem)S.gems+=pr.gem;
+  if(pr.mult&&pr.mult>1){S.mult=pr.mult;S.multEnd=Date.now()+(pr.multMin||5)*60000;}
+  pr.used=(pr.used||0)+1;
+  S.usedPromos[code]=true;
+  save();updateUI();
+  let result=`✅ ${pr.desc || code}`;
+  if(pr.gold)result+=` | +${pr.gold.toLocaleString()} 🪙`;
+  if(pr.gem)result+=` | +${pr.gem} 💎`;
+  if(pr.mult>1)result+=` | ×${pr.mult} буст на ${pr.multMin||5} мин`;
+  msg.textContent=result;msg.style.color='#3DDC84';
+  showToast(result);adminLog(`Промокод ${code} активирован: ${result}`);
+}
+
+// ===== ADMIN =====
+function openAdmin(){document.getElementById('adminOverlay').classList.add('show');}
+function checkAdminPass(){
+  const pass=document.getElementById('adminPassInput').value;
+  if(pass===ADMIN_PASSWORD){
+    document.getElementById('adminAuth').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    refreshPromoList();
+  } else showToast('❌ Неверный пароль');
+}
+function createPromo(){
+  const code=document.getElementById('newPromoCode').value.trim().toUpperCase();
+  const gold=+document.getElementById('newPromoGold').value||0;
+  const gem=+document.getElementById('newPromoGem').value||0;
+  const mult=+document.getElementById('newPromoMult').value||1;
+  const multMin=+document.getElementById('newPromoMultDur').value||5;
+  const uses=+document.getElementById('newPromoUses').value||999;
+  if(!code){showToast('Введи код');return;}
+  S.promoCodes[code]={gold,gem,mult,multMin,uses,used:0,desc:`${gold?'+'+gold+'🪙 ':''}${gem?'+'+gem+'💎 ':''}${mult>1?'×'+mult+' '+multMin+'мин':''}`};
+  save();refreshPromoList();
+  showToast(`✅ Промокод ${code} создан!`);
+  adminLog(`Создан промокод: ${code} | gold:${gold} gem:${gem} mult:${mult}x${multMin}мин uses:${uses}`);
+  document.getElementById('newPromoCode').value='';
+  document.getElementById('newPromoGold').value='';
+  document.getElementById('newPromoGem').value='';
+  document.getElementById('newPromoMult').value='1';
+}
+function refreshPromoList(){
+  const list=document.getElementById('promoList');
+  const codes=Object.entries(S.promoCodes);
+  if(!codes.length){list.textContent='Промокодов нет';return;}
+  list.innerHTML=codes.map(([code,pr])=>`<div style="margin-bottom:4px"><b style="color:#f9ca24">${code}</b> — ${pr.desc||''} | использовано: ${pr.used||0}/${pr.uses||'∞'} <span style="color:#e74c3c;cursor:pointer" onclick="deletePromo('${code}')">[удалить]</span></div>`).join('');
+}
+function deletePromo(code){
+  delete S.promoCodes[code];save();refreshPromoList();
+  showToast(`🗑️ Промокод ${code} удалён`);
+}
+function adminGive(){
+  const gold=+document.getElementById('giveGold').value||0;
+  const gem=+document.getElementById('giveGem').value||0;
+  S.gold+=gold;S.gems+=gem;save();updateUI();
+  showToast(`✅ Выдано: ${gold>0?'+'+gold+'🪙 ':''}${gem>0?'+'+gem+'💎':''}`);
+  adminLog(`Выдано: ${gold} монет, ${gem} кристаллов`);
+}
+function setGlobalMult(){
+  const m=+document.getElementById('globalMult').value||1;
+  const min=+document.getElementById('globalMultDur').value||10;
+  S.mult=m;S.multEnd=Date.now()+min*60000;
+  save();updateUI();
+  showToast(`⚡ Глобальный буст ×${m} на ${min} мин`);
+  adminLog(`Установлен буст ×${m} на ${min} мин`);
+}
+function adminLog(msg){
+  const time=new Date().toLocaleTimeString();
+  S.adminLog.unshift(`[${time}] ${msg}`);
+  if(S.adminLog.length>50)S.adminLog.pop();
+  const el=document.getElementById('adminLog');
+  if(el)el.innerHTML=S.adminLog.slice(0,20).join('<br>');
+}
+
+function closeOverlay(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('show');}));
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+
+// ===== BANK =====
+let selectedTerm = {days:1, rate:2};
+
+function selectTerm(btn){
+  document.querySelectorAll('.term-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedTerm={days:+btn.dataset.days, rate:+btn.dataset.rate};
+  updateBankPreview();
+}
+
+function updateBankPreview(){
+  const amt=+document.getElementById('bankAmount')?.value||0;
+  const preview=document.getElementById('bankPreview');
+  if(!preview)return;
+  if(!amt){preview.textContent='Выбери срок и сумму';return;}
+  const profit=Math.floor(amt*selectedTerm.rate/100);
+  const total=amt+profit;
+  preview.innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Вклад:</span><span style="color:var(--gold)">${amt.toLocaleString()} 🪙</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Срок:</span><span>${selectedTerm.days} дн.</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Ставка:</span><span style="color:var(--green)">+${selectedTerm.rate}%</span></div>
+    <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:6px;margin-top:4px"><span><b>Получишь:</b></span><span style="color:var(--green);font-weight:700">${total.toLocaleString()} 🪙</span></div>
+  `;
+}
+
+document.addEventListener('input', e=>{ if(e.target.id==='bankAmount') updateBankPreview(); });
+
+function openDeposit(){
+  const amt=+document.getElementById('bankAmount').value||0;
+  if(amt<100){showToast('Минимальный вклад 100 🪙');return;}
+  if(S.gold<amt){showToast('❌ Недостаточно монет');return;}
+  S.gold-=amt;
+  const now=Date.now();
+  const deposit={
+    id:'DEP-'+Date.now().toString(36).toUpperCase(),
+    amount:amt,
+    rate:selectedTerm.rate,
+    days:selectedTerm.days,
+    startTs:now,
+    endTs:now+selectedTerm.days*24*60*60*1000,
+    profit:Math.floor(amt*selectedTerm.rate/100),
+    status:'active'
+  };
+  if(!S.deposits)S.deposits=[];
+  S.deposits.push(deposit);
+  save();updateUI();renderDeposits();
+  showToast(`📥 Вклад ${amt.toLocaleString()}🪙 на ${selectedTerm.days} дн. открыт!`);
+  document.getElementById('bankAmount').value='';
+  updateBankPreview();
+}
+
+function claimDeposit(id){
+  if(!S.deposits)return;
+  const dep=S.deposits.find(d=>d.id===id);
+  if(!dep||dep.status!=='active')return;
+  const now=Date.now();
+  if(now<dep.endTs){
+    // Early withdrawal — lose profit
+    const earlyAmt=dep.amount;
+    dep.status='withdrawn';
+    S.gold+=earlyAmt;
+    save();updateUI();renderDeposits();
+    showToast(`⚠️ Досрочный вывод. Получено ${earlyAmt.toLocaleString()}🪙 (без процентов)`);
+    return;
+  }
+  const total=dep.amount+dep.profit;
+  dep.status='completed';
+  S.gold+=total;
+  save();updateUI();renderDeposits();
+  showToast(`✅ Вклад завершён! +${total.toLocaleString()}🪙 (+${dep.profit.toLocaleString()}🪙 проценты)`);
+}
+
+function renderDeposits(){
+  if(!S.deposits)S.deposits=[];
+  // Auto-mature check
+  const now=Date.now();
+  const active=S.deposits.filter(d=>d.status==='active');
+  const hist=S.deposits.filter(d=>d.status!=='active');
+  const activeEl=document.getElementById('activeDeposits');
+  const histEl=document.getElementById('depositHistory');
+  if(!activeEl||!histEl)return;
+
+  if(!active.length){activeEl.innerHTML='<p style="color:#555;font-size:12px">Активных вкладов нет</p>';}
+  else{
+    activeEl.innerHTML=active.map(dep=>{
+      const ready=now>=dep.endTs;
+      const timeLeft=dep.endTs-now;
+      const daysLeft=Math.ceil(timeLeft/86400000);
+      const hoursLeft=Math.ceil(timeLeft/3600000);
+      const timeStr=ready?'<span style="color:var(--green)">✅ Готово!</span>':(daysLeft>1?`${daysLeft} дн.`:`${hoursLeft} ч.`);
+      const pct=(Math.min(1,(now-dep.startTs)/(dep.endTs-dep.startTs))*100).toFixed(0);
+      return `<div style="background:#0d0d18;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid ${ready?'rgba(61,220,132,.3)':'var(--border)'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:11px;color:#555;font-family:monospace">${dep.id}</span>
+          <span style="font-size:11px;color:#888">${timeStr}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+          <span>💰 ${dep.amount.toLocaleString()}🪙 <span style="color:var(--green)">+${dep.rate}%</span></span>
+          <span style="color:var(--gold);font-weight:700">→ ${(dep.amount+dep.profit).toLocaleString()}🪙</span>
+        </div>
+        <div style="background:#1a1a2e;border-radius:4px;height:4px;margin-bottom:8px">
+          <div style="background:var(--green);height:4px;border-radius:4px;width:${pct}%;transition:width 1s"></div>
+        </div>
+        <button class="buy-btn ${ready?'gold-btn':''}" style="background:${ready?'':'#2a2a3a'};color:${ready?'#000':'#888'};padding:6px" onclick="claimDeposit('${dep.id}')">
+          ${ready?'💰 Забрать '+((dep.amount+dep.profit).toLocaleString())+'🪙':'⚠️ Досрочно (без %%)'}
+        </button>
+      </div>`;
+    }).join('');
+  }
+
+  if(!hist.length){histEl.innerHTML='<p style="color:#555;font-size:12px">История пуста</p>';}
+  else{
+    histEl.innerHTML=hist.slice(0,10).reverse().map(dep=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <span style="color:#555;font-family:monospace">${dep.id}</span>
+        <span>${dep.amount.toLocaleString()}🪙 +${dep.rate}%</span>
+        <span style="color:${dep.status==='completed'?'var(--green)':'#888'}">${dep.status==='completed'?'+'+dep.profit.toLocaleString()+'🪙':'Досрочно'}</span>
+      </div>`).join('');
+  }
+}
+
+// Check deposits on tab open
+const origSwitch=switchTab;
+function switchTab(t){
+  origSwitch(t);
+  if(t==='bank'){renderDeposits();updateBankPreview();}
+}
+
+// Auto-check deposits every 30 seconds
+setInterval(()=>{
+  if(!S.deposits)return;
+  const now=Date.now();
+  let changed=false;
+  S.deposits.forEach(dep=>{
+    if(dep.status==='active'&&now>=dep.endTs){changed=true;}
+  });
+  if(changed){renderDeposits();}
+},30000);
+
+
+// ===== INIT =====
+updateUI();
+renderShop();
+newGame();
+</script>
+</body>
+</html>
